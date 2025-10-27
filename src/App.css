@@ -1,0 +1,700 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #222222;
+  color: white;
+  font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Roboto", "Oxygen", "Ubuntu", "Cantarell", sans-serif;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  background-color: #222222;
+  width: 100%;
+}
+
+.App {
+  min-height: 100vh;
+  background-color: #222222;
+  width: 100%;
+}
+
+/* Hide the navigation for now since we're implementing the home page design */
+nav {
+  display: none;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+/* Layout Styles */
+.layout {
+  min-height: 100vh;
+  background-color: #222222;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.main-layout {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Home Page Styles */
+.home-page {
+  width: 100%;
+  flex: 1;
+}
+
+/* Header Styles */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #222222;
+  width: 100%;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.logo-section:hover {
+  opacity: 0.8;
+}
+
+.firebase-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.logo-text {
+  font-size: 1.4rem;
+  font-weight: 400;
+  color: white;
+  margin: 0;
+}
+
+.header-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.signup-btn {
+  background: linear-gradient(90deg, #ffc400 0%, #ff9100 100%);
+  color: #222222;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  font-size: 0.9rem;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.signup-btn:hover {
+  opacity: 0.9;
+  color: #222222;
+}
+
+.login-btn {
+  background-color: #333333;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.9rem;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.login-btn:hover {
+  background-color: #444444;
+  color: white;
+}
+
+.user-email {
+  color: #888888;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-right: 0.5rem;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+
+.logout-btn {
+  background-color: #333333;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 50px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.9rem;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.logout-btn:hover {
+  background-color: #444444;
+  color: white;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  text-align: center;
+  width: 100%;
+}
+
+/* Hero Section */
+.hero-section {
+  margin-top: 2rem;
+  margin-bottom: 3rem;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 300;
+  line-height: 1.2;
+  color: white;
+  margin: 0;
+}
+
+.firebase-highlight {
+  background: linear-gradient(90deg, #ffc400 0%, #ff9100 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 500;
+}
+
+/* Project Tags */
+.project-tags-wrapper {
+  max-width: 650px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.project-tags {
+  display: flex;
+  gap: 10px;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.project-tags::-webkit-scrollbar {
+  display: none;
+}
+
+.project-tags-wrapper::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 30px;
+  background: linear-gradient(to right, #222222 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.project-tags-wrapper::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 30px;
+  background: linear-gradient(to left, #222222 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.project-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.5rem 1rem;
+  background-color: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50px;
+  color: white;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.project-tag:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Selected project tag with gradient border using nested containers */
+.project-tag-outer.selected {
+  background: linear-gradient(90deg, #ffc400 0%, #ff9100 100%);
+  border-radius: 50px;
+  padding: 2px;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.project-tag-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.5rem 1rem;
+  background-color: #222222;
+  border-radius: 50px;
+  color: white;
+  font-weight: 500;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  box-sizing: border-box;
+  border: 2px solid transparent;
+}
+
+.project-tag-inner span {
+  background: linear-gradient(90deg, #ffc400 0%, #ff9100 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.tag-logo {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+/* Input Section */
+.input-section {
+  width: 100%;
+  max-width: 650px;
+}
+
+.input-container {
+  border: 1px solid white;
+  border-radius: 30px;
+  padding: 1.5rem;
+  padding-bottom: 1rem;
+  background-color: #222222;
+  position: relative;
+}
+
+.chat-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 1rem;
+  resize: none;
+  outline: none;
+  min-height: 120px;
+  font-family: inherit;
+}
+
+.chat-input::placeholder {
+  color: #888888;
+}
+
+.input-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.mode-selector {
+  background-color: #333333;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  width: 150px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mode-selector:hover {
+  background-color: #444444;
+}
+
+.dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 150px;
+  background-color: #333333;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.dropdown-option {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: transparent;
+  border: none;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.dropdown-option:hover {
+  background-color: #444444;
+}
+
+.dropdown-option.selected {
+  background-color: #555555;
+}
+
+.chevron {
+  font-size: 0.8rem;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+}
+
+.dropdown-container.open .chevron {
+  transform: rotate(180deg);
+}
+
+.send-btn {
+  background-color: white;
+  color: #222222;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+  margin-right: -0.5rem;
+}
+
+.send-btn:hover {
+  background-color: #f0f0f0;
+}
+
+.send-arrow {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+/* Login Page Styles */
+.login-page {
+  width: 100%;
+  flex: 1;
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  color: #888888;
+  margin-top: 1rem;
+  font-weight: 400;
+}
+
+.login-form-container {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.75rem;
+}
+
+.form-group:last-of-type {
+  margin-bottom: 1.5rem;
+}
+
+.password-input-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.password-input {
+  padding-right: 3rem;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #888888;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  z-index: 1;
+  width: 24px;
+  height: 24px;
+}
+
+.password-toggle:hover {
+  color: #ffc400;
+}
+
+.password-toggle svg {
+  width: 100%;
+  height: 100%;
+}
+
+.form-input {
+  background-color: #333333;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 100px;
+  padding: 1rem 1.2rem;
+  color: white;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.2s, background-color 0.2s;
+  outline: none;
+}
+
+.form-input:focus {
+  border-color: #ffc400;
+  background-color: #3a3a3a;
+}
+
+.form-input::placeholder {
+  color: #888888;
+}
+
+.error-message {
+  color: #ff6b6b;
+  font-size: 0.9rem;
+  text-align: center;
+  margin-top: -1rem;
+  margin-bottom: 0.5rem;
+}
+
+.login-btn-primary {
+  background: linear-gradient(90deg, #ffc400 0%, #ff9100 100%);
+  color: #222222;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 100px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+  font-family: inherit;
+}
+
+.login-btn-primary:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.login-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 2rem 0;
+  text-align: center;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.divider span {
+  padding: 0 1rem;
+  color: #888888;
+  font-size: 0.9rem;
+  background-color: #222222;
+}
+
+.google-signin-btn {
+  background-color: #333333;
+  border: none;
+  border-radius: 100px;
+  padding: 1rem 2rem;
+  color: white;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.google-signin-btn:hover:not(:disabled) {
+  background-color: #444444;
+  transform: translateY(-1px);
+}
+
+.google-signin-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.google-logo {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.signup-link {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.signup-link p {
+  color: #888888;
+  font-size: 0.95rem;
+}
+
+.link {
+  color: #ffc400;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.link:hover {
+  color: #ff9100;
+}
+
+/* Signup Page Styles */
+.signup-page {
+  width: 100%;
+  flex: 1;
+}
+
+/* Responsive Design for Login and Signup */
+@media (max-width: 768px) {
+  .login-form-container {
+    max-width: 100%;
+    padding: 0 1rem;
+  }
+
+  .hero-title {
+    font-size: 2.5rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+}
