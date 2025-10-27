@@ -1,6 +1,23 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { getServiceAccount } from "../services/userService";
+import {
+  initializeUserFirebase,
+  discoverCollections,
+  fetchRequiredData,
+} from "../services/firebaseAdminService";
+import {
+  sendMessageToGemini,
+  analyzeDataRequirements,
+} from "../services/geminiService";
+import {
+  saveDashboard,
+  updateDashboard,
+  addMessageToDashboard,
+} from "../services/dashboardService";
+import DynamicDashboard from "../components/DynamicDashboard";
+import LoadingAnimation from "../components/LoadingAnimation";
 
 const View = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -9,6 +26,14 @@ const View = () => {
   const [isAIPanelCollapsed, setIsAIPanelCollapsed] = useState(false);
   const [messages, setMessages] = useState([]);
   const [projectName, setProjectName] = useState("");
+  const [currentProjectId, setCurrentProjectId] = useState("");
+  const [dashboardCode, setDashboardCode] = useState("");
+  const [dashboardData, setDashboardData] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [conversationHistory, setConversationHistory] = useState([]);
+  const [dashboardId, setDashboardId] = useState(null);
+  const [firestoreSchema, setFirestoreSchema] = useState({});
+  const [userFirebase, setUserFirebase] = useState(null);
   const messagesEndRef = useRef(null);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -18,9 +43,20 @@ const View = () => {
 
   // Get query parameters from URL
   useEffect(() => {
+    console.log("URL search params:", location.search);
     const searchParams = new URLSearchParams(location.search);
     const mode = searchParams.get("mode");
     const projectName = searchParams.get("project");
+    const projectId = searchParams.get("projectId");
+
+    console.log(
+      "Parsed params - mode:",
+      mode,
+      "projectName:",
+      projectName,
+      "projectId:",
+      projectId
+    );
 
     if (mode) {
       setSelectedMode(decodeURIComponent(mode));
@@ -28,7 +64,50 @@ const View = () => {
     if (projectName) {
       setProjectName(decodeURIComponent(projectName));
     }
+    if (projectId) {
+      setCurrentProjectId(decodeURIComponent(projectId));
+    }
   }, [location.search]);
+
+  // Initialize user's Firebase connection
+  useEffect(() => {
+    const initializeFirebase = async () => {
+      console.log("Firebase init - user:", user);
+      console.log("Firebase init - currentProjectId:", currentProjectId);
+
+      if (!user || !currentProjectId || currentProjectId.trim() === "") {
+        console.log("Skipping Firebase init - missing user or projectId");
+        return;
+      }
+
+      try {
+        console.log("Getting service account...");
+        const serviceAccount = await getServiceAccount(
+          user.uid,
+          currentProjectId
+        );
+        console.log("Service account:", serviceAccount);
+
+        if (serviceAccount) {
+          console.log("Initializing user Firebase...");
+          const firebase = initializeUserFirebase(serviceAccount);
+          setUserFirebase(firebase);
+
+          // Discover collections and build schema
+          console.log("Discovering collections...");
+          const collections = await discoverCollections(firebase.db, []);
+          console.log("Discovered collections:", collections);
+          setFirestoreSchema(collections);
+        } else {
+          console.log("No service account found");
+        }
+      } catch (error) {
+        console.error("Error initializing Firebase:", error);
+      }
+    };
+
+    initializeFirebase();
+  }, [user, currentProjectId]);
 
   const handleModeSelect = (mode) => {
     setSelectedMode(mode);
@@ -43,24 +122,136 @@ const View = () => {
     setInputValue(e.target.value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (inputValue.trim()) {
-      // Add message to the messages array
-      const newMessage = {
-        id: Date.now(),
-        text: inputValue.trim(),
-        mode: selectedMode,
+    if (!inputValue.trim() || isLoading) return;
+
+    const userMessage = inputValue.trim();
+    const messageId = Date.now();
+
+    // Add user message to chat
+    const userMessageObj = {
+      id: messageId,
+      text: userMessage,
+      mode: selectedMode,
+      timestamp: new Date(),
+      type: "user",
+    };
+    setMessages((prevMessages) => [...prevMessages, userMessageObj]);
+    setInputValue("");
+    setIsLoading(true);
+
+    try {
+      // Analyze what data we need
+      const dataRequirements = await analyzeDataRequirements(
+        userMessage,
+        firestoreSchema
+      );
+
+      // Fetch the required data
+      let fetchedData = {};
+      console.log("Data requirements:", dataRequirements);
+      console.log("User Firebase:", userFirebase);
+      console.log("Collections length:", dataRequirements.collections?.length);
+      console.log("Collections array:", dataRequirements.collections);
+
+      if (userFirebase && dataRequirements.collections.length > 0) {
+        console.log("Fetching data...");
+        fetchedData = await fetchRequiredData(
+          userFirebase.db,
+          dataRequirements
+        );
+        console.log("Fetched data result:", fetchedData);
+      } else {
+        console.log(
+          "Skipping data fetch - userFirebase:",
+          !!userFirebase,
+          "collections length:",
+          dataRequirements.collections?.length
+        );
+      }
+
+      // Send message to Gemini
+      const aiResponse = await sendMessageToGemini(
+        userMessage,
+        conversationHistory,
+        firestoreSchema,
+        dashboardCode || null
+      );
+
+      if (aiResponse.success) {
+        // Add AI response to chat
+        const aiMessageObj = {
+          id: messageId + 1,
+          text: aiResponse.fullResponse,
+          timestamp: new Date(),
+          type: "ai",
+        };
+        setMessages((prevMessages) => [...prevMessages, aiMessageObj]);
+
+        // Update conversation history
+        const newConversationEntry = {
+          userMessage,
+          aiResponse: aiResponse.fullResponse,
+        };
+        setConversationHistory((prev) => [...prev, newConversationEntry]);
+
+        // Update dashboard code and data
+        console.log("AI Response success:", aiResponse.success);
+        console.log("Setting dashboard code:", aiResponse.code);
+        console.log("Setting dashboard data:", fetchedData);
+        console.log("Data requirements:", dataRequirements);
+        setDashboardCode(aiResponse.code);
+        setDashboardData(fetchedData);
+
+        // Save or update dashboard
+        if (dashboardId) {
+          await updateDashboard(dashboardId, {
+            code: aiResponse.code,
+            data: fetchedData,
+            dataRequirements,
+          });
+          await addMessageToDashboard(
+            dashboardId,
+            userMessage,
+            aiResponse.fullResponse
+          );
+        } else {
+          const newDashboardId = await saveDashboard(
+            user.uid,
+            currentProjectId,
+            {
+              code: aiResponse.code,
+              data: fetchedData,
+              dataRequirements,
+              messages: [...conversationHistory, newConversationEntry],
+              title: `Dashboard for ${projectName}`,
+              description: userMessage,
+            }
+          );
+          setDashboardId(newDashboardId);
+        }
+      } else {
+        // Add error message to chat
+        const errorMessageObj = {
+          id: messageId + 1,
+          text: `Error: ${aiResponse.error}`,
+          timestamp: new Date(),
+          type: "error",
+        };
+        setMessages((prevMessages) => [...prevMessages, errorMessageObj]);
+      }
+    } catch (error) {
+      console.error("Error processing message:", error);
+      const errorMessageObj = {
+        id: messageId + 1,
+        text: `Error: ${error.message}`,
         timestamp: new Date(),
+        type: "error",
       };
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
-
-      // Clear the input
-      setInputValue("");
-
-      // For now, just log the input - you can add actual functionality later
-      console.log("User input:", inputValue);
-      console.log("Selected mode:", selectedMode);
+      setMessages((prevMessages) => [...prevMessages, errorMessageObj]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -94,9 +285,43 @@ const View = () => {
             isAIPanelCollapsed ? "expanded" : ""
           }`}
         >
-          {/* This is the large dark gray panel from the screenshot */}
+          {/* Dashboard Content */}
           <div className="view-panel-content">
-            {/* Content area is now empty */}
+            <DynamicDashboard
+              code={dashboardCode}
+              data={dashboardData}
+              isLoading={isLoading}
+            />
+            {/* Debug button for testing */}
+            <button
+              onClick={() => {
+                const testCode = `function Dashboard({ data }) {
+                  return (
+                    <div style={{ padding: '20px', color: 'white' }}>
+                      <h1>Test Dashboard</h1>
+                      <p>This is a test dashboard to verify rendering works.</p>
+                      <p>Data received: {JSON.stringify(data, null, 2)}</p>
+                    </div>
+                  );
+                }`;
+                setDashboardCode(testCode);
+                setDashboardData({ test: "data" });
+              }}
+              style={{
+                position: "absolute",
+                top: "10px",
+                right: "10px",
+                padding: "5px 10px",
+                background: "#ffc400",
+                color: "#222",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "12px",
+              }}
+            >
+              Test Dashboard
+            </button>
           </div>
         </div>
 
@@ -142,12 +367,18 @@ const View = () => {
           {/* Messages Area */}
           <div className="view-messages-container">
             {messages.map((message) => (
-              <div key={message.id} className="view-message">
+              <div
+                key={message.id}
+                className={`view-message ${message.type || "user"}`}
+              >
                 <div className="view-message-content">
                   <div className="view-message-text">{message.text}</div>
                 </div>
               </div>
             ))}
+            {isLoading && (
+              <LoadingAnimation message="Generating dashboard..." />
+            )}
             <div ref={messagesEndRef} />
           </div>
 
