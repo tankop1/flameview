@@ -22,6 +22,7 @@ const Home = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const [isDragOver, setIsDragOver] = useState(false);
+  const [chatInput, setChatInput] = useState("");
   const fileInputRef = useRef(null);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -168,6 +169,31 @@ const Home = () => {
   // Handle "Try it for free" button click
   const handleTryFreeClick = () => {
     navigate("/signup");
+  };
+
+  // Handle chat input change
+  const handleChatInputChange = (e) => {
+    setChatInput(e.target.value);
+  };
+
+  // Handle send button click
+  const handleSendClick = () => {
+    if (chatInput.trim()) {
+      // Navigate to View page with the input as a query parameter
+      navigate(
+        `/view?input=${encodeURIComponent(chatInput)}&mode=${encodeURIComponent(
+          selectedMode
+        )}`
+      );
+    }
+  };
+
+  // Handle Enter key press in textarea
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSendClick();
+    }
   };
 
   return (
@@ -323,8 +349,11 @@ const Home = () => {
                 <div className="input-container">
                   <textarea
                     className="chat-input"
-                    placeholder="Ask anything about your Firebase data..."
+                    placeholder="Describe the view you want to create..."
                     rows="4"
+                    value={chatInput}
+                    onChange={handleChatInputChange}
+                    onKeyPress={handleKeyPress}
                   />
                   <div className="input-controls">
                     <div
@@ -355,7 +384,7 @@ const Home = () => {
                         </div>
                       )}
                     </div>
-                    <button className="send-btn">
+                    <button className="send-btn" onClick={handleSendClick}>
                       <span className="send-arrow">↑</span>
                     </button>
                   </div>

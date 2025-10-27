@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ConnectFirebase from "./pages/ConnectFirebase";
+import View from "./pages/View";
 import "./App.css";
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/connect-firebase" element={<ConnectFirebase />} />
+              <Route path="/view" element={<View />} />
             </Routes>
           </Layout>
         </div>
