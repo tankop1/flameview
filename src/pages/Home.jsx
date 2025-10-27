@@ -180,10 +180,11 @@ const Home = () => {
   const handleSendClick = () => {
     if (chatInput.trim()) {
       // Navigate to View page with the input as a query parameter
+      const projectName = selectedProject ? selectedProject.displayName : "";
       navigate(
         `/view?input=${encodeURIComponent(chatInput)}&mode=${encodeURIComponent(
           selectedMode
-        )}`
+        )}&project=${encodeURIComponent(projectName)}`
       );
     }
   };

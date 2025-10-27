@@ -8,6 +8,7 @@ const View = () => {
   const [inputValue, setInputValue] = useState("");
   const [isAIPanelCollapsed, setIsAIPanelCollapsed] = useState(false);
   const [messages, setMessages] = useState([]);
+  const [projectName, setProjectName] = useState("");
   const messagesEndRef = useRef(null);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -19,9 +20,13 @@ const View = () => {
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
     const mode = searchParams.get("mode");
+    const projectName = searchParams.get("project");
 
     if (mode) {
       setSelectedMode(decodeURIComponent(mode));
+    }
+    if (projectName) {
+      setProjectName(decodeURIComponent(projectName));
     }
   }, [location.search]);
 
@@ -65,11 +70,23 @@ const View = () => {
 
   // Auto-scroll to bottom when new messages are added
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
   }, [messages]);
 
   return (
     <div className="view-page">
+      {/* Project Name Header */}
+      {projectName && (
+        <div className="view-project-header">
+          <span className="view-project-name">&gt; {projectName}</span>
+        </div>
+      )}
+
       {/* Main Content Area */}
       <main className="view-main-content">
         <div
