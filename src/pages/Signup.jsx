@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "../firebase/config";
+import { hasFirebaseConnection } from "../services/userService";
 import googleLogo from "../assets/Google Logo.png";
 
 const Signup = () => {
@@ -36,7 +37,13 @@ const Signup = () => {
     try {
       await createUserWithEmailAndPassword(auth, email, password);
       // User successfully created and signed in
-      navigate("/");
+      // Check if user has Firebase connection, if not redirect to connect page
+      const hasConnection = await hasFirebaseConnection(auth.currentUser.uid);
+      if (!hasConnection) {
+        navigate("/connect-firebase");
+      } else {
+        navigate("/");
+      }
     } catch (err) {
       console.error("Signup error:", err);
       let errorMessage = "Failed to create account. Please try again.";
@@ -73,7 +80,13 @@ const Signup = () => {
     try {
       await signInWithPopup(auth, googleProvider);
       // User successfully signed up/signed in with Google
-      navigate("/");
+      // Check if user has Firebase connection, if not redirect to connect page
+      const hasConnection = await hasFirebaseConnection(auth.currentUser.uid);
+      if (!hasConnection) {
+        navigate("/connect-firebase");
+      } else {
+        navigate("/");
+      }
     } catch (err) {
       console.error("Google signup error:", err);
       let errorMessage = "Failed to sign up with Google.";
