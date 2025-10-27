@@ -1021,8 +1021,10 @@ nav {
   flex-direction: column;
   gap: 0.5rem;
   height: 100%;
+  max-height: 100%;
   position: relative;
   transition: all 0.3s ease;
+  overflow: hidden;
 }
 
 .view-ai-panel.collapsed {
@@ -1055,6 +1057,39 @@ nav {
   top: 0.5rem;
   right: 0.5rem;
   z-index: 10;
+}
+
+.view-messages-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem;
+  padding-bottom: 0;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.75rem;
+  min-height: 0;
+  max-height: calc(100vh - 200px);
+  margin-top: 50px;
+  margin-bottom: 5px;
+}
+
+.view-message {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.view-message-content {
+  background-color: #333333;
+  border-radius: 12px;
+  padding: 0.75rem;
+  max-width: 80%;
+}
+
+.view-message-text {
+  color: white;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  word-wrap: break-word;
 }
 
 .view-ai-spacer {
@@ -1117,6 +1152,7 @@ nav {
   font-family: inherit;
   padding: 0.25rem 0;
   margin-left: 5px;
+  padding-right: 10px;
   resize: none;
   min-height: 40px;
 }

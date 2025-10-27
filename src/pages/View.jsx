@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -7,6 +7,8 @@ const View = () => {
   const [selectedMode, setSelectedMode] = useState("Read only");
   const [inputValue, setInputValue] = useState("");
   const [isAIPanelCollapsed, setIsAIPanelCollapsed] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const messagesEndRef = useRef(null);
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -39,6 +41,18 @@ const View = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (inputValue.trim()) {
+      // Add message to the messages array
+      const newMessage = {
+        id: Date.now(),
+        text: inputValue.trim(),
+        mode: selectedMode,
+        timestamp: new Date(),
+      };
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
+
+      // Clear the input
+      setInputValue("");
+
       // For now, just log the input - you can add actual functionality later
       console.log("User input:", inputValue);
       console.log("Selected mode:", selectedMode);
@@ -48,6 +62,11 @@ const View = () => {
   const handleCollapseToggle = () => {
     setIsAIPanelCollapsed(!isAIPanelCollapsed);
   };
+
+  // Auto-scroll to bottom when new messages are added
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   return (
     <div className="view-page">
@@ -103,8 +122,17 @@ const View = () => {
             </>
           )}
 
-          {/* Spacer to push chatbot to bottom */}
-          <div className="view-ai-spacer"></div>
+          {/* Messages Area */}
+          <div className="view-messages-container">
+            {messages.map((message) => (
+              <div key={message.id} className="view-message">
+                <div className="view-message-content">
+                  <div className="view-message-text">{message.text}</div>
+                </div>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
 
           {/* Chatbot Input Box - Bottom Right */}
           <div className="view-chatbot-container">
