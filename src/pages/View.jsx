@@ -199,18 +199,27 @@ const View = () => {
       }
 
       // Send message to Gemini
+      console.log(
+        "Sending to Gemini - fetchedData keys:",
+        Object.keys(fetchedData)
+      );
+      console.log(
+        "Sending to Gemini - fetchedData sample:",
+        JSON.stringify(fetchedData, null, 2).substring(0, 500) + "..."
+      );
       const aiResponse = await sendMessageToGemini(
         userMessage,
         conversationHistory,
         firestoreSchema,
-        dashboardCode || null
+        dashboardCode || null,
+        fetchedData
       );
 
       if (aiResponse.success) {
         // Add AI response to chat
         const aiMessageObj = {
           id: messageId + 1,
-          text: aiResponse.fullResponse,
+          text: aiResponse.summary || aiResponse.fullResponse,
           timestamp: new Date(),
           type: "ai",
         };
@@ -219,7 +228,7 @@ const View = () => {
         // Update conversation history
         const newConversationEntry = {
           userMessage,
-          aiResponse: aiResponse.fullResponse,
+          aiResponse: aiResponse.summary || aiResponse.fullResponse,
         };
         setConversationHistory((prev) => [...prev, newConversationEntry]);
 
@@ -241,7 +250,7 @@ const View = () => {
           await addMessageToDashboard(
             dashboardId,
             userMessage,
-            aiResponse.fullResponse
+            aiResponse.summary || aiResponse.fullResponse
           );
         } else {
           const newDashboardId = await saveDashboard(

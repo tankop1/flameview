@@ -1102,6 +1102,7 @@ nav {
   font-size: 0.85rem;
   line-height: 1.4;
   word-wrap: break-word;
+  white-space: pre-line;
 }
 
 .view-ai-spacer {
