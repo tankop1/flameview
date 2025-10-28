@@ -34,6 +34,8 @@ const View = () => {
   const [dashboardId, setDashboardId] = useState(null);
   const [firestoreSchema, setFirestoreSchema] = useState({});
   const [userFirebase, setUserFirebase] = useState(null);
+  const [initialUserInput, setInitialUserInput] = useState("");
+  const [hasSentInitialInput, setHasSentInitialInput] = useState(false);
   const messagesEndRef = useRef(null);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -48,6 +50,7 @@ const View = () => {
     const mode = searchParams.get("mode");
     const projectName = searchParams.get("project");
     const projectId = searchParams.get("projectId");
+    const initialInput = searchParams.get("input");
 
     console.log(
       "Parsed params - mode:",
@@ -66,6 +69,9 @@ const View = () => {
     }
     if (projectId) {
       setCurrentProjectId(decodeURIComponent(projectId));
+    }
+    if (initialInput) {
+      setInitialUserInput(decodeURIComponent(initialInput));
     }
   }, [location.search]);
 
@@ -109,6 +115,28 @@ const View = () => {
     initializeFirebase();
   }, [user, currentProjectId]);
 
+  // If an initial input was provided via URL, auto-send it once
+  useEffect(() => {
+    // Send as soon as Firebase is initialized; don't block on schema discovery
+    const ready =
+      user &&
+      currentProjectId &&
+      currentProjectId.trim() !== "" &&
+      userFirebase;
+    if (!hasSentInitialInput && initialUserInput && ready && !isLoading) {
+      // Directly send the initial message
+      sendUserMessage(initialUserInput);
+      setHasSentInitialInput(true);
+    }
+  }, [
+    hasSentInitialInput,
+    initialUserInput,
+    user,
+    currentProjectId,
+    userFirebase,
+    isLoading,
+  ]);
+
   const handleModeSelect = (mode) => {
     setSelectedMode(mode);
     setIsDropdownOpen(false);
@@ -122,11 +150,10 @@ const View = () => {
     setInputValue(e.target.value);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!inputValue.trim() || isLoading) return;
-
-    const userMessage = inputValue.trim();
+  // Reusable message sender used by submit and initial input
+  const sendUserMessage = async (userMessage) => {
+    if (!userMessage || !userMessage.trim() || isLoading) return;
+    userMessage = userMessage.trim();
     const messageId = Date.now();
 
     // Add user message to chat
@@ -255,6 +282,11 @@ const View = () => {
     }
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await sendUserMessage(inputValue);
+  };
+
   const handleCollapseToggle = () => {
     setIsAIPanelCollapsed(!isAIPanelCollapsed);
   };
@@ -292,36 +324,6 @@ const View = () => {
               data={dashboardData}
               isLoading={isLoading}
             />
-            {/* Debug button for testing */}
-            <button
-              onClick={() => {
-                const testCode = `function Dashboard({ data }) {
-                  return (
-                    <div style={{ padding: '20px', color: 'white' }}>
-                      <h1>Test Dashboard</h1>
-                      <p>This is a test dashboard to verify rendering works.</p>
-                      <p>Data received: {JSON.stringify(data, null, 2)}</p>
-                    </div>
-                  );
-                }`;
-                setDashboardCode(testCode);
-                setDashboardData({ test: "data" });
-              }}
-              style={{
-                position: "absolute",
-                top: "10px",
-                right: "10px",
-                padding: "5px 10px",
-                background: "#ffc400",
-                color: "#222",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "12px",
-              }}
-            >
-              Test Dashboard
-            </button>
           </div>
         </div>
 

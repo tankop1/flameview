@@ -1021,7 +1021,6 @@ nav {
 }
 
 .view-panel-content {
-  padding: 1rem;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -1328,7 +1327,18 @@ nav {
   width: 100%;
   height: 100%;
   overflow: auto;
-  padding: 1rem;
+}
+
+/* Ensure the dashboard content always fills the full height of the view panel */
+.dynamic-dashboard {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.dynamic-dashboard > * {
+  flex: 1 1 auto;
+  min-height: 100%;
 }
 
 .dashboard-loading {
